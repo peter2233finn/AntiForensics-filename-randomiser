@@ -17,13 +17,13 @@ if [[ -z $prefix || -z $length ]]; then
 	exit 1
 fi
 
-if [[ $length -le 1 ]];
+if [[ $length -le 0 ]];
 then 
 	echo "Length cannot be less than 0"
 	exit 1
 
 fi
-if [[ $prefix -le 0 ]];
+if [[ $prefix -le -1 ]];
 then 
 	echo "Prefix cannot be cannot be negative"
 	exit 1
