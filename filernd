@@ -1,0 +1,62 @@
+while getopts ":p:l:" arg; do
+  case $arg in
+    p) prefix=$OPTARG;;
+    l) length=$OPTARG;;
+  esac
+done
+if [[ $* = *"-d"* ]]
+then
+	doDir=true
+else
+	doDir=false
+fi
+
+if [[ -z $prefix || -z $length ]]; then
+	echo "Usage: filernd -l (new length of files) -p (prefix of files)"
+	echo "set -d to include directories"
+	exit 1
+fi
+
+same=0
+for i in *;
+do
+	set=1
+	while [ "$set" -eq 1 ]
+	do
+		set=0
+		random=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c $(($length-$prefix)) )
+		fileprefix=$(echo ${i::$prefix})
+		if [[ $i == *.* ]]
+		then
+			end=$(echo $i |awk -F"." '{print "." $NF}')
+			newfile="$random""$end"
+		else
+			newfile="$random"
+		fi
+		towrite="$fileprefix""$newfile"
+		if [ -f "$towrite" ] || [ -d "$towrite" ]
+		then
+			echo "Same name detected. Trying again"
+			set=1
+			((same++))
+			if [[ $same -gt 10000 ]]
+			then	
+				echo -e "\nGot file exists 10,000 times in a row"
+				echo "We may have run out of file names." 
+				echo "Try setting the length a bit higher. Exiting"
+				exit
+			fi
+		else
+			if [ -d "$i" ] && [[ $doDir = true ]]
+			then
+				mv "$i" "$towrite"
+				echo "Changing directory $i to $towrite"
+			elif [ ! -d "$i" ]
+			then
+				mv "$i" "$towrite"
+				echo "Changing file $i to $towrite"
+			fi
+			same=0
+		fi
+	done
+done
