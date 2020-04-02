@@ -17,6 +17,15 @@ if [[ -z $prefix || -z $length ]]; then
 	exit 1
 fi
 
+if [[ $length -le 1 ]];
+then 
+	echo "Length cannot be less than 0"
+fi
+if [[ $prefix -le 0 ]];
+then 
+	echo "Prefix cannot be cannot be negative"
+fi
+
 same=0
 for i in *;
 do
